@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('user_id');
+            $table->uuid('sender_account_id');
+            $table->uuid('receiver_account_id');
+            $table->decimal('amount', 10, 2);
             $table->string('currency');
-            $table->decimal('balance', 10, 2);
+            $table->decimal('exchange_rate', 10, 2);
             $table->timestamps();
-//            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('transactions');
     }
 };
