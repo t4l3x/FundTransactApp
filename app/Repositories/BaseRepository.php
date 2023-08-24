@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Repositories\Contracts\EloquentRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 
-abstract class BaseRepository
+abstract class BaseRepository implements EloquentRepositoryInterface
 {
     protected Model $model;
 
@@ -14,7 +15,12 @@ abstract class BaseRepository
         $this->model = $model;
     }
 
-    public function getById(string $id): ?Model
+    public function create(array $attributes): Model
+    {
+        return $this->model->create($attributes);
+    }
+
+    public function find($id): ?Model
     {
         return $this->model->find($id);
     }
