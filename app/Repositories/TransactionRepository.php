@@ -4,25 +4,27 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Account;
-use App\Models\Transaction;
+use App\Models\Transactions;
 use App\Repositories\Contracts\ITransactionRepository;
+use App\ValueObjects\Currency;
 use App\ValueObjects\Money;
 use Illuminate\Support\Collection;
 
 class TransactionRepository extends BaseRepository implements ITransactionRepository
 {
-    public function __construct(Transaction $transaction)
+    public function __construct(Transactions $transaction)
     {
         parent::__construct($transaction);
     }
 
 
-    public function createTransaction(Account $senderAccount, Account $receiverAccount, Money $amount): Transaction
+    public function createTransaction(Account $senderAccount, Account $receiverAccount, Money $amount, Currency $currency): Transactions
     {
-        $transaction = new Transaction([
+        $transaction = new Transactions([
             'sender_account_id' => $senderAccount->id,
             'receiver_account_id' => $receiverAccount->id,
-            'amount' => $amount,
+            'amount' => $amount->toDecimalAmount(),
+            'currency' => $currency->getCurrency(),
         ]);
 
         $transaction->save();
@@ -39,5 +41,10 @@ class TransactionRepository extends BaseRepository implements ITransactionReposi
             ->limit($limit)
             ->offset($offset)
             ->get();
+    }
+
+    public function getById(string $id): ?Transactions
+    {
+        return $this->model->find($id);
     }
 }
