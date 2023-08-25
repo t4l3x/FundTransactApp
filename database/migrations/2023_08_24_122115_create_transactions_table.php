@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('receiver_account_id');
             $table->decimal('amount', 10, 2);
             $table->string('currency');
-            $table->decimal('exchange_rate', 10, 2);
+            $table->decimal('exchange_rate', 10, 2)->nullable();
             $table->timestamps();
         });
     }
