@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\ValueObjects;
 
 use Money\Currency as MoneyCurrency;
+
 class Currency
 {
     private MoneyCurrency $currency;
@@ -21,5 +22,10 @@ class Currency
     public function equals(self $other): bool
     {
         return $this->isoCode() === $other->isoCode();
+    }
+
+    public function getCurrency(): MoneyCurrency
+    {
+        return $this->currency;
     }
 }
