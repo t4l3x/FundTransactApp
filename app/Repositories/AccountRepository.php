@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Account;
+use App\Models\User;
 use App\Repositories\Contracts\IAccountRepository;
+use App\ValueObjects\Currency;
 use App\ValueObjects\Money;
 use Illuminate\Support\Collection;
 
@@ -15,20 +17,24 @@ class AccountRepository extends BaseRepository implements IAccountRepository
         parent::__construct($model);
     }
 
-    public function getAllByClientId(string $userId): Collection
+    public function getAllByUser(User $userId): Collection
     {
-        return $this->model->where('user_id', $userId)->get();
+        return $this->model->where('user_id', $userId->id)->get();
     }
 
-    public function getById(string $accountId): ?Account
+    public function getById(Account $accountId): ?Account
     {
-        return $this->model->find($accountId);
+        return $this->model->find($accountId->id);
     }
 
-    public function updateBalance(Account $account, Money $amount): void
+    public function updateBalance(Account $account, Money $amount): bool
     {
-        // Assuming you have a 'balance' attribute in your Account model
-        $account->balance = $amount;
-        $account->save();
+        $integerAmount = $amount->toDecimalAmount();
+
+        $result = $this->model
+            ->where('id', $account->id)
+            ->update(['balance' => $integerAmount]);
+
+        return $result !== false;
     }
 }
