@@ -29,11 +29,10 @@ class AccountRepository extends BaseRepository implements IAccountRepository
 
     public function updateBalance(Account $account, Money $amount): bool
     {
-        $integerAmount = $amount->toDecimalAmount();
 
         $result = $this->model
             ->where('id', $account->id)
-            ->update(['balance' => $integerAmount]);
+            ->update(['balance' => $amount->toDecimalAmount()]);
 
         return $result !== false;
     }
