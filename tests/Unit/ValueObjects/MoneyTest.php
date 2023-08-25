@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Tests\Unit\ValueObjects;
 use Tests\TestCase;
 use App\ValueObjects\Money;
-use Money\Currency;
+use App\ValueObjects\Currency;
 class MoneyTest extends TestCase
 {
     /** @test */

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
-use Money\Currency;
+
 use Money\Money as MoneyPhpMoney;
 
 class Money
@@ -12,7 +12,7 @@ class Money
 
     public function __construct(int|string $amount, Currency $currency)
     {
-        $this->money = new MoneyPhpMoney($amount, $currency);
+        $this->money = new MoneyPhpMoney($amount, $currency->getCurrency());
     }
 
     public static function create(int|string $amount, Currency $currency): self
@@ -25,20 +25,36 @@ class Money
         return $this->money->getAmount();
     }
 
+    public function toIntegerAmount(): int
+    {
+        // Convert decimal to integer representation
+        return (int) bcmul($this->getAmount(), '100');
+    }
+
+    public function toDecimalAmount(): string
+    {
+        // Convert integer back to decimal
+        return bcdiv($this->getAmount(), '100', 2); // Adjust scale as needed
+    }
+
     public function getCurrency(): Currency
     {
-        return $this->money->getCurrency();
+        return new Currency($this->money->getCurrency()->getCode());
     }
 
     public function add(self $other): self
     {
         $newMoney = $this->money->add($other->money);
-        return new self($newMoney->getAmount(), $newMoney->getCurrency());
+        return new self($newMoney->getAmount(), new Currency($newMoney->getCurrency()->getCode()));
     }
 
     public function subtract(self $other): self
     {
         $newMoney = $this->money->subtract($other->money);
-        return new self($newMoney->getAmount(), $newMoney->getCurrency());
+        return new self($newMoney->getAmount(), new Currency($newMoney->getCurrency()->getCode()));
+    }
+    public function equals(self $other): bool
+    {
+        return $this->getAmount() === $other->getAmount() && $this->getCurrency() === $other->getCurrency();
     }
 }
