@@ -10,12 +10,18 @@ class Money
 {
     private MoneyPhpMoney $money;
 
-    public function __construct(int|string $amount, Currency $currency)
+    public function __construct(float|int|string $amount, Currency $currency)
     {
+
+        if (is_float($amount)) {
+            // Convert float to integer (cents) representation
+            $amount = (int)round($amount * 100);
+        }
+
         $this->money = new MoneyPhpMoney($amount, $currency->getCurrency());
     }
 
-    public static function create(int|string $amount, Currency $currency): self
+    public static function create(float|int|string $amount, Currency $currency): self
     {
         return new self($amount, $currency);
     }
@@ -51,6 +57,13 @@ class Money
     public function subtract(self $other): self
     {
         $newMoney = $this->money->subtract($other->money);
+
+        return new self($newMoney->getAmount(), new Currency($newMoney->getCurrency()->getCode()));
+    }
+
+    public function multiply(self $other):self
+    {
+        $newMoney = $this->money->multiply($other->toDecimalAmount());
         return new self($newMoney->getAmount(), new Currency($newMoney->getCurrency()->getCode()));
     }
     public function equals(self $other): bool
