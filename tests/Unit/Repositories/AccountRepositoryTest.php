@@ -63,7 +63,7 @@ class AccountRepositoryTest extends TestCase
         $updatedAccount = $this->accountRepository->getById($account);
 
         // Assert that the balance was updated correctly
-        $this->assertEquals($updatedBalance->toDecimalAmount(), $updatedAccount->balance);
+        $this->assertEquals($updatedBalance->getAmount(), $updatedAccount->balance->getAmount());
 
         // Additional assertion: Check if the returned value from updateBalance is true
         $this->assertTrue($this->accountRepository->updateBalance($account, $updatedBalance));

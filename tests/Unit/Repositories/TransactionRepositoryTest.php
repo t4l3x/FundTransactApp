@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Transactions;
 use App\Repositories\TransactionRepository;
 use App\ValueObjects\Currency;
+use App\ValueObjects\ExchangeRate;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -32,13 +33,16 @@ class TransactionRepositoryTest extends TestCase
         // Create a fake transaction amount
         $currency = new Currency('USD');
         $transactionAmount = Money::create('100050', $currency);
+        $rate = Money::create('1', $currency);
+        $exchangeRate = ExchangeRate::create($currency,$currency,$rate);
 
         // Create a transaction
         $transaction = $this->transactionRepository->createTransaction(
             $senderAccount,
             $receiverAccount,
             $transactionAmount,
-            $currency
+            $currency,
+            $exchangeRate
         );
 
         // Assert that the transaction was created
@@ -46,7 +50,8 @@ class TransactionRepositoryTest extends TestCase
             'sender_account_id' => $senderAccount->id,
             'receiver_account_id' => $receiverAccount->id,
             'amount' => $transactionAmount->toDecimalAmount(),
-            'currency' => $currency->getCurrency()
+            'currency' => $currency->getCurrency(),
+            'exchange_rate' => $exchangeRate->getRate()->toDecimalAmount()
         ]);
 
         // Fetch the created transaction from the database

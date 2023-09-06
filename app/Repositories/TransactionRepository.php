@@ -7,36 +7,36 @@ use App\Models\Account;
 use App\Models\Transactions;
 use App\Repositories\Contracts\ITransactionRepository;
 use App\ValueObjects\Currency;
+use App\ValueObjects\ExchangeRate;
 use App\ValueObjects\Money;
 use Illuminate\Support\Collection;
 
 class TransactionRepository extends BaseRepository implements ITransactionRepository
 {
-    public function __construct(Transactions $transaction)
+    public function __construct(Transactions $model)
     {
-        parent::__construct($transaction);
+        parent::__construct($model);
     }
 
 
-    public function createTransaction(Account $senderAccount, Account $receiverAccount, Money $amount, Currency $currency): Transactions
+    public function createTransaction(Account $senderAccount, Account $receiverAccount, Money $amount, Currency $currency, ExchangeRate $exchangeRate): Transactions
     {
-        $transaction = new Transactions([
+
+       return $this->model->create([
             'sender_account_id' => $senderAccount->id,
             'receiver_account_id' => $receiverAccount->id,
             'amount' => $amount->toDecimalAmount(),
             'currency' => $currency->getCurrency(),
+            'exchange_rate' => $exchangeRate->getRate()->toDecimalAmount()
         ]);
 
-        $transaction->save();
-
-        return $transaction;
     }
 
-    public function getTransactionsByAccountId(string $accountId, int $limit = 10, int $offset = 0): Collection
+    public function getTransactionsByAccountId(Account $account, int $limit = 10, int $offset = 0): Collection
     {
         return $this->model
-            ->where('sender_account_id', $accountId)
-            ->orWhere('receiver_account_id', $accountId)
+            ->where('sender_account_id', $account->id)
+            ->orWhere('receiver_account_id', $account->id)
             ->orderByDesc('created_at')
             ->limit($limit)
             ->offset($offset)
