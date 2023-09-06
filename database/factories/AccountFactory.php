@@ -16,7 +16,16 @@ class AccountFactory extends Factory
      */
     public function definition(): array
     {
-        $currency = new Currency('USD'); // Replace with your desired currency logic
+        // Define an array of currency ISO codes
+        $currencies = ['EUR', 'USD', 'AZN'];
+
+        // Randomly select a currency from the array
+        $currencyCode = $this->faker->randomElement($currencies);
+
+        // Create a Currency object based on the selected ISO code
+        $currency = new Currency($currencyCode);
+
+        // Generate a random balance for the account
         $balance = Money::create($this->faker->randomFloat(2, 0, 50000), $currency);
 
         return [
