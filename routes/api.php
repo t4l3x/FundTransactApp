@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,7 +14,17 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::controller(AuthController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+});
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    // Define your authenticated routes here
+    Route::controller(AccountController::class)->group(function () {
+        Route::post('account', 'createAccount');
+        Route::get('accounts/{user}', [AccountController::class, 'getClientAccounts']);
+        Route::get('accounts/{account}/transactions', [AccountController::class, 'getTransactionHistory']);
+
+    });
 });
