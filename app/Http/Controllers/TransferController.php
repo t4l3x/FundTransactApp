@@ -9,6 +9,7 @@ use App\Services\AccountService;
 use App\Services\Exchange\ExchangeService;
 use App\Services\FundsTransferService;
 use App\ValueObjects\Currency;
+use App\ValueObjects\ExchangeRate;
 use App\ValueObjects\Money;
 use Illuminate\Http\JsonResponse;
 
@@ -34,27 +35,16 @@ class TransferController extends Controller
         // Extract validated data from the request
         $validatedData = $request->validated();
 
-        $senderAccount = $this->accountService->getAccountById($request['from_account_id']);
-        $senderAccountDTO = new AccountDTO($senderAccount->id, $senderAccount->currency, $senderAccount->balance);
-
-        $receiverAccount = $this->accountService->getAccountById($request['to_account_id']);
-        $receiverAccountDto = new AccountDTO($receiverAccount->id, $receiverAccount->currency,$senderAccount->balance);
-
-
-        $validatedData['from_account_currency'] = $senderAccount->currency;
-        $validatedData['to_account_currency'] = $senderAccount->currency;
-
-        $validatedData['from_account_balance'] = $senderAccount->balance;
-        $validatedData['to_account_balance'] = $senderAccount->balance;
+        $validatedData['sender_account'] = $this->accountService->getAccountById($request['from_account_id']);
+        $validatedData['receiver_account'] = $this->accountService->getAccountById($request['to_account_id']);
+        $validatedData['currency'] = $toCurrency = new Currency($validatedData['currency']);
+        $validatedData['amount'] = Money::create($validatedData['amount'], $validatedData['currency']);
         // Get the target currency from the request
-        $toCurrency = new Currency($validatedData['currency']);
+
 
         // Calculate the exchange rate if currencies are different
-        if (!$senderAccountDTO->getCurrency()->equals($toCurrency)) {
-            $validatedData['rate'] = $this->exchangeService->getExchangeRate($toCurrency, $senderAccountDTO->getCurrency())->getRate()->getAmount();
-            $validatedData['rate'] = Money::create($validatedData['rate'], $toCurrency);
-        } else {
-            $validatedData['rate'] = Money::create(1, $senderAccountDTO->getCurrency()); // If sender and receiver have the same currency, no conversion needed
+        if (!$validatedData['sender_account']->getCurrency()->equals($toCurrency)) {
+            $validatedData['rate'] = $this->exchangeService->getExchangeRate($toCurrency, $validatedData['sender_account']->getCurrency());
         }
 
         // Create a TransferRequestDto with validated data and exchange rate

@@ -35,15 +35,7 @@ class TransferRequestDto
      */
     public static function fromRequestData(array $requestData): TransferRequestDto
     {
-        // Extract and convert request data to value objects
-        $senderAccountDTO = new AccountDTO($requestData['from_account_id'], $requestData['from_account_currency'], $requestData['from_account_balance']);
-        $receiverAccountDTO = new AccountDTO($requestData['to_account_id'], $requestData['to_account_currency'], $requestData['to_account_balance']);
-        $amount = new Money($requestData['amount'], new Currency($requestData['currency']));
-        $currency = new Currency($requestData['currency']); // Adjust as needed
-        $exchangeRate = new ExchangeRate($currency, $senderAccountDTO->getCurrency() ,$requestData['rate']);
-
-        // Create and return a TransferRequestDto
-        return new self($senderAccountDTO, $receiverAccountDTO, $amount, $currency, $exchangeRate);
+        return new self($requestData['sender_account'], $requestData['receiver_account'], $requestData['amount'], $requestData['currency'], $requestData['rate']);
     }
     public function getSenderAccount(): AccountDTO
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 
+use App\DTO\AccountDTO;
 use App\Exceptions\Validations\ValidationException;
 use App\Models\Account;
 use App\Models\User;
@@ -55,9 +56,11 @@ class AccountService
         return $this->transactionRepository->getTransactionsByAccountId($accountId, $offset, $limit);
     }
 
-    public function getAccountById($accountId): Account
+    public function getAccountById($accountId): AccountDTO
     {
-        return $this->accountRepository->getById($accountId);
+        $account =  $this->accountRepository->getById($accountId);
+        return new AccountDTO($account->id, $account->currency, $account->balance);
+
     }
 
 }
