@@ -23,8 +23,6 @@ class FundsTransferService
     {
         $this->accountRepository = $accountRepository;
         $this->transactionRepository = $transactionRepository;
-
-
     }
 
 
@@ -65,8 +63,8 @@ class FundsTransferService
     protected function executeTransfer(TransferRequestDto $request): void
     {
         $transaction = $this->transactionRepository->createTransaction(
-            $request->getSenderAccount(),
-            $request->getReceiverAccount(),
+            $request->getSenderAccount()->getId(),
+            $request->getReceiverAccount()->getId(),
             $request->getAmount(),
             $request->getCurrency(),
             $request->getRate()
@@ -77,8 +75,8 @@ class FundsTransferService
 
     protected function updateAccountBalances(TransferRequestDto $request): void
     {
-        $senderAccount = $request->getSenderAccount();
-        $receiverAccount = $request->getReceiverAccount();
+        $senderAccount = $this->accountRepository->getById($request->getSenderAccount()->getId());
+        $receiverAccount = $this->accountRepository->getById($request->getReceiverAccount()->getId());
         $amount = $request->getAmount();
         $exchangeRate = $request->getRate();
 
@@ -86,7 +84,7 @@ class FundsTransferService
         $substractAmountSender = Money::create($amount->multiply($exchangeRate->getRate())->getAmount(), $senderAccount->currency);
 
         // Use a database transaction to ensure consistency during balance updates
-        DB::transaction(function () use ($senderAccount, $receiverAccount, $amount, $substractAmountSender) {
+        DB::transaction(function () use ($senderAccount, $receiverAccount, $amount, $substractAmountSender,$request) {
             try {
                 // Perform balance updates within the transaction
                 $senderNewBalance = $senderAccount->balance->subtract($substractAmountSender);
@@ -102,7 +100,7 @@ class FundsTransferService
                 logger()->error('Error updating account balances: ' . $e->getMessage());
 
                 // Optionally, you can throw the exception here if you want to propagate it
-                // throw $e;
+                 throw $e;
             }
         });
     }
