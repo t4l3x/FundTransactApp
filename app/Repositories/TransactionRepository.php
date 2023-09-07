@@ -9,6 +9,7 @@ use App\Repositories\Contracts\ITransactionRepository;
 use App\ValueObjects\Currency;
 use App\ValueObjects\ExchangeRate;
 use App\ValueObjects\Money;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class TransactionRepository extends BaseRepository implements ITransactionRepository
@@ -32,15 +33,18 @@ class TransactionRepository extends BaseRepository implements ITransactionReposi
 
     }
 
-    public function getTransactionsByAccountId(string $accountId, int $limit = 10, int $offset = 0): Collection
+    public function getTransactionsByAccountId(string $accountId, int $offset = 5, int $limit = 5): Collection
     {
-        return $this->model
+        // Build the query
+        $query = $this->model
             ->where('sender_account_id', $accountId)
             ->orWhere('receiver_account_id', $accountId)
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->offset($offset)
-            ->get();
+            ->orderByDesc('created_at');
+
+        // Paginate the query using simplePaginate (without total count)
+        $paginator = $query->paginate($limit);
+
+        return collect($paginator);
     }
 
     public function getById(string $id): ?Transactions
