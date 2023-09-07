@@ -4,24 +4,21 @@ declare(strict_types=1);
 namespace App\DTO;
 
 use App\ValueObjects\Currency;
+use App\ValueObjects\Money;
+use Mongo;
 
 class AccountDTO
 {
     private string $uuid;
-    private Currency $currencyCode;
+    private Currency $currency;
 
-    public function __construct(string $uuid, Currency $currencyCode)
+    protected Money $balance;
+
+    public function __construct(string $uuid, Currency $currencyCode, Money $balance)
     {
         $this->uuid = $uuid;
-        $this->currencyCode = $currencyCode;
-    }
-
-    public static function fromRequestData(array $requestData): self
-    {
-        return new self(
-            $requestData['id'],
-            $requestData['currency_code']
-        );
+        $this->currency = $currencyCode;
+        $this->balance = $balance;
     }
 
     public function getId(): string
@@ -29,8 +26,13 @@ class AccountDTO
         return $this->uuid;
     }
 
-    public function getCurrencyCode(): Currency
+    public function getCurrency(): Currency
     {
-        return $this->currencyCode;
+        return $this->currency;
     }
+    public function getBalance(): Money
+    {
+        return $this->balance;
+    }
+
 }

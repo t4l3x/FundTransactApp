@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateAccountRequest;
 use App\Http\Resources\AccountResource;
-use App\Http\Resources\TransactionResource;
 use App\Models\Account;
 use App\Models\User;
 use App\Services\AccountService;
 use App\ValueObjects\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 
@@ -53,13 +53,11 @@ class AccountController extends Controller
         return new AccountResource($account);
     }
 
-    public function getTransactionHistory(Account $account, Request $request): AnonymousResourceCollection
+    public function getTransactionHistory(Account $account, Request $request): Collection
     {
         $offset = $request->input('offset', 0);
-        $limit = $request->input('limit', 10);
+        $limit = $request->input('limit', 2);
 
-        $transactions = $this->accountService->getTransactionHistory($account->id, $offset, $limit);
-
-        return TransactionResource::collection($transactions);
+        return $this->accountService->getTransactionHistory($account->id, $offset, $limit);
     }
 }
