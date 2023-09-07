@@ -10,15 +10,15 @@ use App\ValueObjects\Money;
 
 class TransferRequestDto
 {
-    protected Account $senderAccount;
-    protected Account $receiverAccount;
+    protected AccountDTO $senderAccount;
+    protected AccountDTO $receiverAccount;
 
     protected Money $amount;
 
     protected Currency $currency;
     protected ExchangeRate $exchangeRate;
 
-    public function __construct(Account $senderAccount, Account $receiverAccount, Money $amount, Currency $currency, ExchangeRate $exchangeRate)
+    public function __construct(AccountDTO $senderAccount, AccountDTO $receiverAccount, Money $amount, Currency $currency, ExchangeRate $exchangeRate)
     {
         $this->senderAccount = $senderAccount;
         $this->receiverAccount = $receiverAccount;
@@ -27,12 +27,30 @@ class TransferRequestDto
         $this->exchangeRate = $exchangeRate;
     }
 
-    public function getSenderAccount(): Account
+    /**
+     * Create a TransferRequestDto from request input data.
+     *
+     * @param array $requestData
+     * @return TransferRequestDto
+     */
+    public static function fromRequestData(array $requestData): TransferRequestDto
+    {
+        // Extract and convert request data to value objects
+        $senderAccountDTO = new AccountDTO($requestData['from_account_id'], $requestData['from_account_currency']);
+        $receiverAccountDTO = new AccountDTO($requestData['to_account_id'], $requestData['to_account_currency']);
+        $amount = new Money($requestData['amount'], new Currency($requestData['currency']));
+        $currency = new Currency($requestData['currency']); // Adjust as needed
+        $exchangeRate = new ExchangeRate($currency, $senderAccountDTO->getCurrencyCode() ,$requestData['rate']);
+
+        // Create and return a TransferRequestDto
+        return new self($senderAccountDTO, $receiverAccountDTO, $amount, $currency, $exchangeRate);
+    }
+    public function getSenderAccount(): AccountDTO
     {
         return $this->senderAccount;
     }
 
-    public function getReceiverAccount(): Account
+    public function getReceiverAccount(): AccountDTO
     {
         return $this->receiverAccount;
     }
