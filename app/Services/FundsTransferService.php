@@ -4,15 +4,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\TransferRequestDto;
-use App\Models\Account;
+use App\Exceptions\Validations\ValidationException;
 use App\Repositories\Contracts\IAccountRepository;
 use App\Repositories\Contracts\ITransactionRepository;
-use App\Services\Exchange\ExchangeRateProviderFactory;
-use App\Services\Exchange\ExchangeRateProviderInterface;
-use App\Services\Exchange\ExchangeRateService;
-use App\Services\Exchange\ExchangeService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class FundsTransferService
 {
@@ -28,38 +25,43 @@ class FundsTransferService
 
     public function transferFunds(TransferRequestDto $request): bool
     {
+        $this->validateTransfer($request);
+
         return DB::transaction(function () use ($request) {
             try {
-                // 1. Validate the transfer
-//                $this->validateTransfer($request->getSenderAccount(), $request->getAmount());
 
-                // 2. Execute the transfer
                 $this->executeTransfer($request);
 
                 // 3. Dispatch events related to the fund transfer (if needed)
 
                 return true; // Successful transfer within the transaction
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Log the error
                 logger()->error('Error transferring funds: ' . $e->getMessage());
 
                 // Optionally, you can throw the exception here if you want to propagate it
-                // throw $e;
+                throw $e;
 
-                return false; // Indicate failure
             }
         }, 5); // The '5' is the number of times the transaction should be retried in case of deadlock
     }
 
-    protected function validateTransfer(Account $senderAccount, Money $amount): void
+    protected function validateTransfer(TransferRequestDto $request): void
     {
-        $senderBalance = $senderAccount->balance;
 
-        if ($senderBalance->isLessThan($amount)) {
-            throw new InsufficientFundsException("Insufficient funds in sender's account.");
+        if (!$request->getCurrency()->equals($request->getReceiverAccount()->getCurrency())) {
+            throw new ValidationException("Currency of funds must match receiver's account currency.");
+        }
+
+        if ($request->getSenderAccount()->getBalance() < $request->getAmount()) {
+            throw new ValidationException("Insufficient funds in sender's account.");
         }
     }
 
+
+    /**
+     * @throws Throwable
+     */
     protected function executeTransfer(TransferRequestDto $request): void
     {
         $transaction = $this->transactionRepository->createTransaction(
@@ -73,6 +75,9 @@ class FundsTransferService
         $this->updateAccountBalances($request);
     }
 
+    /**
+     * @throws Throwable
+     */
     protected function updateAccountBalances(TransferRequestDto $request): void
     {
         $senderAccount = $this->accountRepository->getById($request->getSenderAccount()->getId());
@@ -84,7 +89,7 @@ class FundsTransferService
         $substractAmountSender = Money::create($amount->multiply($exchangeRate->getRate())->getAmount(), $senderAccount->currency);
 
         // Use a database transaction to ensure consistency during balance updates
-        DB::transaction(function () use ($senderAccount, $receiverAccount, $amount, $substractAmountSender,$request) {
+        DB::transaction(function () use ($senderAccount, $receiverAccount, $amount, $substractAmountSender, $request) {
             try {
                 // Perform balance updates within the transaction
                 $senderNewBalance = $senderAccount->balance->subtract($substractAmountSender);
@@ -95,12 +100,12 @@ class FundsTransferService
                 $this->accountRepository->updateBalance($senderAccount, $senderNewBalance);
                 $this->accountRepository->updateBalance($receiverAccount, $receiverNewBalance);
 
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Log the error
                 logger()->error('Error updating account balances: ' . $e->getMessage());
 
                 // Optionally, you can throw the exception here if you want to propagate it
-                 throw $e;
+                throw $e;
             }
         });
     }
