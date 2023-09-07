@@ -31,7 +31,7 @@ class ExchangeRateProvider implements ExchangeRateProviderInterface
         $cacheKey = "{$toCurrency->getCurrency()}";
 
         if (array_key_exists($cacheKey, $exchangeRates)) {
-            return $exchangeRates[$cacheKey];
+            return $this->cacheService->get($cacheKey);
         }
 
         // Fetch all exchange rates if not already cached
@@ -46,7 +46,7 @@ class ExchangeRateProvider implements ExchangeRateProviderInterface
 
             // Store all exchange rates in cache
             $allRates = $data['rates'];
-            $this->cacheService->put($allRatesCacheKey, $allRates, 2); // Cache for 60 minutes
+            $this->cacheService->put($allRatesCacheKey, $allRates, 1000); // Cache for 60 minutes
 
             // Convert the rates to Money objects and cache them
             foreach ($allRates as $currencyCode => $rate) {
@@ -66,7 +66,7 @@ class ExchangeRateProvider implements ExchangeRateProviderInterface
 
         if (isset($exchangeRates[$cacheKey])) {
             $exchangeRate = $exchangeRates[$cacheKey];
-            $this->cacheService->put($cacheKey, $exchangeRate, 2); // Cache for 60 minutes
+            $this->cacheService->put($cacheKey, $exchangeRate, 1000); // Cache for 60 minutes
         } else {
             throw new \Exception('Exchange rate not found for the specified currencies.');
         }
