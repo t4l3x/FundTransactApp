@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 
+use App\Models\Account;
 use App\Models\User;
 use App\Repositories\Contracts\IAccountRepository;
 use App\Repositories\Contracts\ITransactionRepository;
@@ -15,7 +16,7 @@ use Illuminate\Support\Collection;
 class AccountService
 {
     protected IAccountRepository $accountRepository;
-    private  ITransactionRepository $transactionRepository;
+    private ITransactionRepository $transactionRepository;
 
     public function __construct(IAccountRepository $accountRepository, ITransactionRepository $transactionRepository)
     {
@@ -50,6 +51,11 @@ class AccountService
     public function getTransactionHistory($accountId, $offset, $limit): Collection
     {
         return $this->transactionRepository->getTransactionsByAccountId($accountId, $offset, $limit);
+    }
+
+    public function getAccountById($accountId): Account
+    {
+        return $this->accountRepository->getById($accountId);
     }
 
 }

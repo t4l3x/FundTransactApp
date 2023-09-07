@@ -40,7 +40,7 @@ class AccountRepositoryTest extends TestCase
     {
         $account = Account::factory()->create(); // Create a fake account
 
-        $fetchedAccount = $this->accountRepository->getById($account);
+        $fetchedAccount = $this->accountRepository->getById($account->id);
 
         $this->assertNotNull($fetchedAccount);
 
@@ -60,7 +60,7 @@ class AccountRepositoryTest extends TestCase
         $this->accountRepository->updateBalance($account, $updatedBalance);
 
         // Fetch the account from the database
-        $updatedAccount = $this->accountRepository->getById($account);
+        $updatedAccount = $this->accountRepository->getById($account->id);
 
         // Assert that the balance was updated correctly
         $this->assertEquals($updatedBalance->getAmount(), $updatedAccount->balance->getAmount());

@@ -58,7 +58,7 @@ class AccountController extends Controller
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
 
-        $transactions = $this->accountService->getTransactionHistory($account, $offset, $limit);
+        $transactions = $this->accountService->getTransactionHistory($account->id, $offset, $limit);
 
         return TransactionResource::collection($transactions);
     }

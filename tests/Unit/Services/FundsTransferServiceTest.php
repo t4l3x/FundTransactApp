@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Services;
 
+use App\DTO\AccountDTO;
 use App\DTO\TransferRequestDto;
 use App\Models\Account;
 use App\Models\Transactions;
@@ -57,8 +58,10 @@ class FundsTransferServiceTest extends TestCase
 
         $exchangeRate = Money::create(1.70, new Currency('AZN'));
 
+        $senderAccountDto = new AccountDto($senderAccount->id,$senderAccount->currency);
+        $receiverAccountDto = new AccountDto($receiverAccount->id,$receiverAccount->currency);
         $exchangeRate = ExchangeRate::create(new Currency('USD'), new Currency('AZN'), $exchangeRate); // Exchange rate from USD to EUR
-        $request = new TransferRequestDto($senderAccount, $receiverAccount, $amount, new Currency('USD'), $exchangeRate);
+        $request = new TransferRequestDto($senderAccountDto, $receiverAccountDto, $amount, new Currency('USD'), $exchangeRate);
 
         // Mock any necessary repository or service calls if needed
 
@@ -86,14 +89,18 @@ class FundsTransferServiceTest extends TestCase
         $senderAccount->save();
         $receiverAccount->save();
 
-        $amountInUSD = Money::create(100, new Currency('USD')); // Amount in USD
+        $amountInUSD = Money::create(10, new Currency('USD')); // Amount in USD
 
         // Define the exchange rate
         $exchangeRate = Money::create(170, new Currency('AZN')); // 1 USD = 1.70 AZN
 
         $exchangeRate = ExchangeRate::create(new Currency('USD'), new Currency('AZN'), $exchangeRate); // Exchange rate from USD to AZN
 
-        $request = new TransferRequestDto($senderAccount, $receiverAccount, $amountInUSD, new Currency('USD'), $exchangeRate);
+        $senderAccountDto = new AccountDto($senderAccount->id,$senderAccount->currency);
+        $receiverAccountDto = new AccountDto($receiverAccount->id,$receiverAccount->currency);
+
+        $request = new TransferRequestDto($senderAccountDto, $receiverAccountDto, $amountInUSD, new Currency('USD'), $exchangeRate);
+
 
         // Act
 
@@ -112,8 +119,8 @@ class FundsTransferServiceTest extends TestCase
         // Check if the balances have been updated correctly
 
 
-        $this->assertEquals(830, $senderAccount->balance->getAmount()); // Sender balance should be 1000 - 100 = 900 AZN
-        $this->assertEquals(600, $receiverAccount->balance->getAmount()); // Receiver balance should be 500 + 100*1.70 = 570 USD
+        $this->assertEquals(983, $senderAccount->balance->getAmount()); // Sender balance should be 1000 - 100 = 900 AZN
+        $this->assertEquals(510, $receiverAccount->balance->getAmount()); // Receiver balance should be 500 + 100*1.70 = 570 USD
     }
 
 

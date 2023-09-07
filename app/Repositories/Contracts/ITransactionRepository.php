@@ -12,8 +12,8 @@ use Illuminate\Support\Collection;
 
 interface ITransactionRepository
 {
-    public function createTransaction(Account $senderAccount, Account $receiverAccount, Money $amount, Currency $currency, ExchangeRate $exchangeRate): Transactions;
-    public function getTransactionsByAccountId(Account $account, int $limit = 10, int $offset = 0): Collection;
+    public function createTransaction(string $senderAccountUuid, string $receiverAccountUuid, Money $amount, Currency $currency, ExchangeRate $exchangeRate): Transactions;
+    public function getTransactionsByAccountId(string $account, int $limit = 10, int $offset = 0): Collection;
 
 
 }

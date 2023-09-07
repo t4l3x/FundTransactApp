@@ -38,8 +38,8 @@ class TransactionRepositoryTest extends TestCase
 
         // Create a transaction
         $transaction = $this->transactionRepository->createTransaction(
-            $senderAccount,
-            $receiverAccount,
+            $senderAccount->id,
+            $receiverAccount->id,
             $transactionAmount,
             $currency,
             $exchangeRate

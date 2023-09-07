@@ -12,7 +12,7 @@ interface IAccountRepository
 {
     public function getAllByUser(User $userIdId): Collection;
 
-    public function getById(Account $accountId): ?Account;
+    public function getById(string $accountId): ?Account;
 
     public function updateBalance(Account $account, Money $amount): bool;
 

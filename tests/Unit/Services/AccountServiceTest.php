@@ -7,6 +7,8 @@ use App\Models\Account;
 use App\Models\User;
 use App\Repositories\AccountRepository;
 use App\Repositories\Contracts\IAccountRepository;
+use App\Repositories\Contracts\ITransactionRepository;
+use App\Repositories\TransactionRepository;
 use App\Services\AccountService;
 use App\ValueObjects\Currency;
 use Illuminate\Database\Eloquent\Model;
@@ -17,15 +19,17 @@ class AccountServiceTest extends TestCase
     protected AccountService $accountService;
     protected IAccountRepository $accountRepository;
 
+    protected ITransactionRepository $transactionRepository;
     public function setUp(): void
     {
         parent::setUp();
 
         // Mock the account repository
         $this->accountRepository = $this->createMock(AccountRepository::class);
+        $this->transactionRepository = $this->createMock(TransactionRepository::class);
 
         // Create an instance of the AccountService with the mock repository
-        $this->accountService = new AccountService($this->accountRepository);
+        $this->accountService = new AccountService($this->accountRepository,$this->transactionRepository);
     }
 
     public function testCreateAccountWhenUserHasNoAccountInCurrency()

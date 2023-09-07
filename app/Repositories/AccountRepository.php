@@ -23,9 +23,9 @@ class AccountRepository extends BaseRepository implements IAccountRepository
       return  $result = $this->model->where('user_id', $userId->id)->get();
     }
 
-    public function getById(Account $accountId): ?Account
+    public function getById(string $accountId): ?Account
     {
-        return $this->model->find($accountId->id);
+        return $this->model->find($accountId);
     }
 
 
