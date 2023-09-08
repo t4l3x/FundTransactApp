@@ -89,6 +89,7 @@ class FundsTransferService
         DB::transaction(function () use ($amount, $subtractAmountSender, $request) {
             try {
                 // Perform balance updates within the transaction
+
                 $senderNewBalance = $request->getSenderAccount()->getBalance()->subtract($subtractAmountSender);
                 $receiverNewBalance = $request->getReceiverAccount()->getBalance()->add($amount);
 

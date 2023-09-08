@@ -59,7 +59,7 @@ class FundsTransferServiceTest extends TestCase
         $exchangeRate = Money::create(1.70, new Currency('AZN'));
 
         $senderAccountDto = new AccountDto($senderAccount->id,$senderAccount->currency, $senderAccount->balance);
-        $receiverAccountDto = new AccountDto($receiverAccount->id,$receiverAccount->currency,$senderAccount->balance);
+        $receiverAccountDto = new AccountDto($receiverAccount->id,$receiverAccount->currency,$receiverAccount->balance);
         $exchangeRate = ExchangeRate::create(new Currency('USD'), new Currency('AZN'), $exchangeRate); // Exchange rate from USD to EUR
         $request = new TransferRequestDto($senderAccountDto, $receiverAccountDto, $amount, new Currency('USD'), $exchangeRate);
 
