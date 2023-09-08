@@ -53,9 +53,7 @@ class FundsTransferService
             throw new ValidationException("Currency of funds must match receiver's account currency.");
         }
 
-        if ($request->getSenderAccount()->getBalance() < $request->getAmount()) {
-            throw new ValidationException("Insufficient funds in sender's account.");
-        }
+
     }
 
 
@@ -80,25 +78,24 @@ class FundsTransferService
      */
     protected function updateAccountBalances(TransferRequestDto $request): void
     {
-        $senderAccount = $this->accountRepository->getById($request->getSenderAccount()->getId());
-        $receiverAccount = $this->accountRepository->getById($request->getReceiverAccount()->getId());
+
         $amount = $request->getAmount();
         $exchangeRate = $request->getRate();
 
         // Calculate the amount in the receiver's currency using the multiply method
-        $substractAmountSender = Money::create($amount->multiply($exchangeRate->getRate())->getAmount(), $senderAccount->currency);
+        $subtractAmountSender = Money::create($amount->multiply($exchangeRate->getRate())->getAmount(), $request->getSenderAccount()->getCurrency());
 
         // Use a database transaction to ensure consistency during balance updates
-        DB::transaction(function () use ($senderAccount, $receiverAccount, $amount, $substractAmountSender, $request) {
+        DB::transaction(function () use ($amount, $subtractAmountSender, $request) {
             try {
                 // Perform balance updates within the transaction
-                $senderNewBalance = $senderAccount->balance->subtract($substractAmountSender);
-                $receiverNewBalance = $receiverAccount->balance->add($amount);
+                $senderNewBalance = $request->getSenderAccount()->getBalance()->subtract($subtractAmountSender);
+                $receiverNewBalance = $request->getReceiverAccount()->getBalance()->add($amount);
 
                 // Update sender and receiver balances
 
-                $this->accountRepository->updateBalance($senderAccount, $senderNewBalance);
-                $this->accountRepository->updateBalance($receiverAccount, $receiverNewBalance);
+                $this->accountRepository->updateBalance($request->getSenderAccount(), $senderNewBalance);
+                $this->accountRepository->updateBalance($request->getReceiverAccount(), $receiverNewBalance);
 
             } catch (Throwable $e) {
                 // Log the error
