@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Repositories;
 
+use App\DTO\AccountDTO;
 use App\Models\Account;
 use App\Models\User;
 use App\Repositories\AccountRepository;
@@ -56,11 +57,11 @@ class AccountRepositoryTest extends TestCase
         $updatedBalance = Money::create('1500', new Currency('USD'));
 
         // Update the balance
-
+        $account = new AccountDTO($account->id,$account->currency,$account->balance);
         $this->accountRepository->updateBalance($account, $updatedBalance);
 
         // Fetch the account from the database
-        $updatedAccount = $this->accountRepository->getById($account->id);
+        $updatedAccount = $this->accountRepository->getById($account->getId());
 
         // Assert that the balance was updated correctly
         $this->assertEquals($updatedBalance->getAmount(), $updatedAccount->balance->getAmount());

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\DTO\AccountDTO;
 use App\Models\Account;
 use App\Models\User;
 use App\Repositories\Contracts\IAccountRepository;
@@ -29,11 +30,11 @@ class AccountRepository extends BaseRepository implements IAccountRepository
     }
 
 
-    public function updateBalance(Account $account, Money $amount): bool
+    public function updateBalance(AccountDTO $account, Money $amount): bool
     {
 
         $result = $this->model
-            ->where('id', $account->id)
+            ->where('id', $account->getId())
             ->update(['balance' => $amount->toDecimalAmount()]);
 
         return $result !== false;

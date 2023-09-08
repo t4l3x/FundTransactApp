@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
+use App\DTO\AccountDTO;
 use App\Models\Account;
 use App\Models\User;
 use App\ValueObjects\Money;
@@ -14,6 +15,6 @@ interface IAccountRepository
 
     public function getById(string $accountId): ?Account;
 
-    public function updateBalance(Account $account, Money $amount): bool;
+    public function updateBalance(AccountDTO $account, Money $amount): bool;
 
 }

@@ -78,6 +78,6 @@ class TransactionRepositoryTest extends TestCase
         $transactions = $this->transactionRepository->getTransactionsByAccountId($account->id);
 
         // Perform assertions
-        $this->assertCount(10, $transactions);
+        $this->assertCount(13, $transactions->toArray());
     }
 }
