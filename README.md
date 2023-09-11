@@ -26,11 +26,7 @@
 ### Getting Started
 
 1. Clone this repository.
-2. Install dependencies: `composer install`.
-3. Set up environment variables in `.env`.
-4. Generate an application key: `php artisan key:generate`.
-5. Migrate the database: `php artisan migrate`.
-6. Start the server: `php artisan serve`.
+2. Install dependencies: `composer install`. or `docker compose -up -d`
 
 ### Development Environment
 
@@ -38,11 +34,13 @@
 - Ensure you have Docker and Sail installed: [Laravel Sail Documentation](https://laravel.com/docs/8.x/sail).
 1. Start the development environment with Sail: (sail up -d, ./vendor/bin/sail  
    up -d, docker compose up -d)
-
+2. Run Migrations `sail artisan migrate`
 
 ### Usage
 - Use the API endpoints to interact with the service.
-
+- Import the provided Postman collection located at `tests/mintos.postman_collection.json`. This collection contains a set of API requests for testing the application.
+- Send a POST request to the `/api/register `endpoint to register a new user. You will receive a response containing the user information. 
+- After registering, obtain an access token. This token will be used as a bearer token for subsequent API requests.In Postman, set the access token as a bearer token in the "Authorization" section of your requests. This will authenticate your requests with the token.
 ### Testing
 
 - Run tests with `php artisan test`.
