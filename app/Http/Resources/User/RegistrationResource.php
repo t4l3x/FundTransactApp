@@ -17,6 +17,7 @@ class RegistrationResource extends  JsonResource
                 'email' => $this->email,
                 // Add any additional registration-specific data here
             ],
+            'token' => $this->createToken('auth_token')->plainTextToken,
         ];
     }
 }

@@ -17,7 +17,7 @@ class LoginResource extends JsonResource
                 'email' => $this->email,
                 // Add any additional login-specific data here
             ],
-            'token' => $this->token, // Include the authentication token if needed
+            'token' => $this->createToken('auth_token')->plainTextToken, // Include the authentication token if needed
         ];
     }
 }
