@@ -24,13 +24,8 @@ class AuthController extends Controller
 
         $user = User::create($request->validated());
 
-        // Generate a token for the registered user
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'message' => 'User registered successfully',
             'user' => new RegistrationResource($user),
-            'token' => $token,
         ]);
     }
 
@@ -51,13 +46,6 @@ class AuthController extends Controller
         // Retrieve the authenticated user
         $user = Auth::user();
 
-        // Generate a token for the authenticated user
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'User logged in successfully',
-            'user' => new LoginResource($user),
-            'token' => $token,
-        ]);
+        return response()->json(new LoginResource($user));
     }
 }
